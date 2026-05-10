@@ -9,5 +9,7 @@ public class AppDbContext : DbContext
     {
     }
     public DbSet<Setor> Setores { get; set; }
+
+    public DbSet<Servico> Servicos { get; set; }
 }
 
