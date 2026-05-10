@@ -9,7 +9,7 @@ namespace ControleChamados.Models
 
         [Required(ErrorMessage = "O nome é obrigatório")]
         public string Nome { get; set; } = string.Empty;
-
+        //TESTE GIT
         public string? Descricao { get; set; }
     }
 }
