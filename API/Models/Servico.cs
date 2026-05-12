@@ -13,5 +13,9 @@ namespace ControleChamados.Models
         public string? Descricao { get; set; }
         
         public int PrazoHoras { get; set; } // Tempo estimado para resolver
+
+        public int SetorId { get; set; }
+
+        public Setor? Setor { get; set; }
     }
 }

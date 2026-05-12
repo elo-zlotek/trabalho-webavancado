@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ControleChamados.Data;
 using ControleChamados.Models;
+using ControleChamados.DTOs;
 
 namespace ControleChamados.Controllers
 {
@@ -15,18 +16,32 @@ namespace ControleChamados.Controllers
 
         [HttpGet] 
         public async Task<ActionResult<IEnumerable<Servico>>> GetServicos() 
-            => await _context.Servicos.ToListAsync();
+        {
+            return await _context.Servicos
+                .Include(s => s.Setor)
+                .ToListAsync();
+        }
 
         [HttpGet("{id}")] 
         public async Task<ActionResult<Servico>> GetServico(int id)
         {
-            var servico = await _context.Servicos.FindAsync(id);
+            var servico = await _context.Servicos
+                .Include(s => s.Setor)
+                .FirstOrDefaultAsync(s => s.Id == id);
             return servico == null ? NotFound() : servico;
         }
 
         [HttpPost] 
-        public async Task<ActionResult<Servico>> PostServico(Servico servico)
+        public async Task<ActionResult<Servico>> PostServico(CriarServicoDto dto)
         {
+            var servico = new Servico
+            {
+                Nome = dto.Nome,
+                Descricao = dto.Descricao,
+                PrazoHoras = dto.PrazoHoras,
+                SetorId = dto.SetorId
+            };
+
             _context.Servicos.Add(servico);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetServico), new { id = servico.Id }, servico);
