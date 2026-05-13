@@ -60,10 +60,51 @@ namespace ControleChamados.Controllers
 
             await _context.SaveChangesAsync();
 
+            var chamadoDto = await _context.Chamados
+                .Include(c => c.Servico)
+                .Include(c => c.Usuario)
+                .Include(c => c.Responsavel)
+                .Where(c => c.Id == chamado.Id)
+                .Select(c => new ChamadoDto
+                {
+                    Id = c.Id,
+                    Titulo = c.Titulo,
+                    Descricao = c.Descricao,
+                    Status = c.Status,
+                    DataCriacao = c.DataCriacao,
+                    PrazoConclusao = c.PrazoConclusao,
+                    DataConclusao = c.DataConclusao,
+
+                    Servico = c.Servico == null
+                        ? null
+                        : new ServicoResumoDto
+                        {
+                            Id = c.Servico.Id,
+                            Nome = c.Servico.Nome
+                        },
+
+                    Usuario = c.Usuario == null
+                        ? null
+                        : new UsuarioResumoDto
+                        {
+                            Id = c.Usuario.Id,
+                            Nome = c.Usuario.Nome
+                        },
+
+                    Responsavel = c.Responsavel == null
+                        ? null
+                        : new UsuarioResumoDto
+                        {
+                            Id = c.Responsavel.Id,
+                            Nome = c.Responsavel.Nome
+                        }
+                })
+                .FirstOrDefaultAsync();
+
             return CreatedAtAction(
                 nameof(GetChamado),
                 new { id = chamado.Id },
-                chamado
+                chamadoDto
             );
         }
 
