@@ -152,6 +152,18 @@ namespace ControleChamados.Controllers
         [HttpDelete("{id}")] 
         public async Task<IActionResult> DeleteServico(int id)
         {
+            bool possuiChamados = await _context.Chamados
+                .AnyAsync(c => c.ServicoId == id);
+
+            if (possuiChamados)
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Não é possível excluir um serviço vinculado a chamados."
+                });
+            }
+
             var servico = await _context.Servicos.FindAsync(id);
             if (servico == null) return NotFound();
             _context.Servicos.Remove(servico);

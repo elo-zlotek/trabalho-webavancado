@@ -97,6 +97,18 @@ namespace ControleChamados.Controllers
                 return NotFound("Setor não encontrado.");
             }
 
+            bool possuiServicos = await _context.Servicos
+                .AnyAsync(s => s.SetorId == id);
+
+            if (possuiServicos)
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Não é possível excluir um setor vinculado a serviços."
+                });
+            }
+
             setor.Nome = dto.Nome;
             setor.Descricao = dto.Descricao;
 
