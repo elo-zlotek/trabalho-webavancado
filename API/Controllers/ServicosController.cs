@@ -14,26 +14,76 @@ namespace ControleChamados.Controllers
 
         public ServicosController(AppDbContext context) { _context = context; }
 
-        [HttpGet] 
-        public async Task<ActionResult<IEnumerable<Servico>>> GetServicos() 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ServicoDto>>>GetServicos()
         {
-            return await _context.Servicos
+            var servicos = await _context.Servicos
                 .Include(s => s.Setor)
+                .Select(s => new ServicoDto
+                {
+                    Id = s.Id,
+                    Nome = s.Nome,
+                    Descricao = s.Descricao,
+                    PrazoHoras = s.PrazoHoras,
+
+                    Setor = s.Setor == null
+                        ? null
+                        : new SetorResumoDto
+                        {
+                            Id = s.Setor.Id,
+                            Nome = s.Setor.Nome
+                        }
+                })
                 .ToListAsync();
+
+            return Ok(servicos);
         }
 
-        [HttpGet("{id}")] 
-        public async Task<ActionResult<Servico>> GetServico(int id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ServicoDto>>GetServico(int id)
         {
             var servico = await _context.Servicos
                 .Include(s => s.Setor)
-                .FirstOrDefaultAsync(s => s.Id == id);
-            return servico == null ? NotFound() : servico;
+                .Where(s => s.Id == id)
+                .Select(s => new ServicoDto
+                {
+                    Id = s.Id,
+                    Nome = s.Nome,
+                    Descricao = s.Descricao,
+                    PrazoHoras = s.PrazoHoras,
+
+                    Setor = s.Setor == null
+                        ? null
+                        : new SetorResumoDto
+                        {
+                            Id = s.Setor.Id,
+                            Nome = s.Setor.Nome
+                        }
+                })
+                .FirstOrDefaultAsync();
+
+            if (servico == null)
+            {
+                return NotFound("Serviço não encontrado.");
+            }
+
+            return Ok(servico);
         }
 
-        [HttpPost] 
-        public async Task<ActionResult<Servico>> PostServico(CriarServicoDto dto)
+        [HttpPost]
+        public async Task<ActionResult<ServicoDto>>PostServico(CriarServicoDto dto)
         {
+            var setor = await _context.Setores
+                .FirstOrDefaultAsync(s => s.Id == dto.SetorId);
+
+            if (setor == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Setor não encontrado."
+                });
+            }
+
             var servico = new Servico
             {
                 Nome = dto.Nome,
@@ -44,14 +94,55 @@ namespace ControleChamados.Controllers
 
             _context.Servicos.Add(servico);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetServico), new { id = servico.Id }, servico);
+
+            var response = new ServicoDto
+            {
+                Id = servico.Id,
+                Nome = servico.Nome,
+                Descricao = servico.Descricao,
+                PrazoHoras = servico.PrazoHoras,
+
+                Setor = new SetorResumoDto
+                {
+                    Id = setor.Id,
+                    Nome = setor.Nome
+                }
+            };
+
+            return CreatedAtAction(
+                nameof(GetServico),
+                new { id = servico.Id },
+                response
+            );
         }
 
-        [HttpPut("{id}")] 
-        public async Task<IActionResult> PutServico(int id, Servico servico)
+        [HttpPut("{id}")]
+        public async Task<IActionResult>PutServico(int id, CriarServicoDto dto)
         {
-            if (id != servico.Id) return BadRequest();
-            _context.Entry(servico).State = EntityState.Modified;
+            var servico = await _context.Servicos
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (servico == null)
+            {
+                return NotFound("Serviço não encontrado.");
+            }
+
+            var setor = await _context.Setores
+                .FirstOrDefaultAsync(s => s.Id == dto.SetorId);
+
+            if (setor == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Setor não encontrado."
+                });
+            }
+
+            servico.Nome = dto.Nome;
+            servico.Descricao = dto.Descricao;
+            servico.PrazoHoras = dto.PrazoHoras;
+            servico.SetorId = dto.SetorId;
+
             await _context.SaveChangesAsync();
             return NoContent();
         }
