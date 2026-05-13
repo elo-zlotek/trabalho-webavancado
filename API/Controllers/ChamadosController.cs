@@ -195,12 +195,27 @@ namespace ControleChamados.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutChamado(int id, CriarChamadoDto dto)
         {
+            string? login = User.Identity?.Name;
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Login == login);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
             var chamado = await _context.Chamados
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (chamado == null)
             {
                 return NotFound("Chamado não encontrado.");
+            }
+
+            if (chamado.UsuarioId != usuario.Id)
+            {
+                return Forbid();
             }
 
             if (chamado.Status == "Concluído")
@@ -236,7 +251,6 @@ namespace ControleChamados.Controllers
             chamado.Descricao = dto.Descricao;
             chamado.ServicoId = dto.ServicoId;
 
-            // recalcula prazo
             chamado.PrazoConclusao = chamado.DataCriacao
                 .AddHours(servico.PrazoHoras);
 
@@ -248,12 +262,27 @@ namespace ControleChamados.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteChamado(int id)
         {
+            string? login = User.Identity?.Name;
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Login == login);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
             var chamado = await _context.Chamados
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (chamado == null)
             {
                 return NotFound("Chamado não encontrado.");
+            }
+
+            if (chamado.UsuarioId != usuario.Id)
+            {
+                return Forbid();
             }
 
             _context.Chamados.Remove(chamado);
@@ -268,12 +297,36 @@ namespace ControleChamados.Controllers
             int id,
             AlterarStatusChamadoDto dto)
         {
+            string? login = User.Identity?.Name;
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Login == login);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
             var chamado = await _context.Chamados
+                .Include(c => c.Servico)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (chamado == null)
             {
                 return NotFound("Chamado não encontrado.");
+            }
+
+            if (chamado.Servico == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Serviço do chamado não encontrado."
+                });
+            }
+
+            if (usuario.SetorId != chamado.Servico.SetorId)
+            {
+                return Forbid();
             }
 
             var statusValidos = new[]
@@ -352,6 +405,7 @@ namespace ControleChamados.Controllers
             }
 
             var chamado = await _context.Chamados
+                .Include(c => c.Servico)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (chamado == null)
@@ -360,6 +414,19 @@ namespace ControleChamados.Controllers
                 {
                     message = "Chamado não encontrado."
                 });
+            }
+
+            if (chamado.Servico == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Serviço do chamado não encontrado."
+                });
+            }
+
+            if (usuario.SetorId != chamado.Servico.SetorId)
+            {
+                return Forbid();
             }
 
             if (chamado.ResponsavelId != null)

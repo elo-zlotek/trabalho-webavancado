@@ -43,6 +43,11 @@ namespace ControleChamados.Controllers
                 });
             }
 
+            if (chamado.UsuarioId != usuario.Id && chamado.Servico?.SetorId != usuario.SetorId)
+            {
+                return Forbid();
+            }
+
             if (chamado.Status == "Concluído")
             {
                 return BadRequest(new
@@ -82,16 +87,32 @@ namespace ControleChamados.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MensagemChamadoDto>>>GetMensagens(int chamadoId)
         {
-            var chamadoExiste = await _context.Chamados
-                .AnyAsync(c => c.Id == chamadoId);
+            string? login = User.Identity?.Name;
 
-            if (!chamadoExiste)
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Login == login);
+
+            if (usuario == null){
+                return Unauthorized();
+            }
+
+            var chamado = await _context.Chamados
+                .Include(c => c.Servico)
+                .FirstOrDefaultAsync(c => c.Id == chamadoId);
+
+            if (chamado == null)
             {
                 return NotFound(new
                 {
                     message = "Chamado não encontrado."
                 });
             }
+
+            if (chamado.UsuarioId != usuario.Id && chamado.Servico?.SetorId != usuario.SetorId)
+            {
+                return Forbid();
+            }
+
 
             var mensagens = await _context.MensagensChamados
                 .Include(m => m.Usuario)
