@@ -73,6 +73,7 @@ namespace ControleChamados.Controllers
             var chamado = await _context.Chamados
                 .Include(c => c.Servico)
                 .Include(c => c.Usuario)
+                .Include(c => c.Responsavel)
                 .Where(c => c.Id == id)
                 .Select(c => new ChamadoDto
                 {
@@ -94,6 +95,12 @@ namespace ControleChamados.Controllers
                     {
                         Id = c.Usuario.Id,
                         Nome = c.Usuario.Nome
+                    },
+
+                    Responsavel = c.Responsavel == null ? null : new UsuarioResumoDto
+                    {
+                        Id = c.Responsavel.Id,
+                        Nome = c.Responsavel.Nome
                     }
                 })
                 .FirstOrDefaultAsync();
@@ -110,6 +117,7 @@ namespace ControleChamados.Controllers
             var chamados = await _context.Chamados
                 .Include(c => c.Servico)
                 .Include(c => c.Usuario)
+                .Include(c => c.Responsavel)
                 .Select(c => new ChamadoDto
                 {
                     Id = c.Id,
@@ -130,6 +138,12 @@ namespace ControleChamados.Controllers
                     {
                         Id = c.Usuario.Id,
                         Nome = c.Usuario.Nome
+                    },
+
+                    Responsavel = c.Responsavel == null ? null : new UsuarioResumoDto
+                    {
+                        Id = c.Responsavel.Id,
+                        Nome = c.Responsavel.Nome
                     }
                 })
                 .ToListAsync();
@@ -259,6 +273,68 @@ namespace ControleChamados.Controllers
             return Ok(new
             {
                 message = "Status atualizado com sucesso."
+            });
+        }
+
+        [HttpPatch("{id}/assumir")]
+        public async Task<IActionResult> AssumirChamado(int id)
+        {
+            string? login = User.Identity?.Name;
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Login == login);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            var chamado = await _context.Chamados
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (chamado == null)
+            {
+                return NotFound(new
+                {
+                    message = "Chamado não encontrado."
+                });
+            }
+
+            if (chamado.ResponsavelId != null)
+            {
+                return BadRequest(new
+                {
+                    message = "Este chamado já possui um responsável."
+                });
+            }
+
+            if (chamado.Status == "Concluído")
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Não é possível assumir um chamado concluído."
+                });
+            }
+
+            if (chamado.Status == "Cancelado")
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Não é possível assumir um chamado cancelado."
+                });
+            }
+
+            chamado.ResponsavelId = usuario.Id;
+
+            chamado.Status = "Em Atendimento";
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Chamado assumido com sucesso."
             });
         }
     }

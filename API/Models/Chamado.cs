@@ -28,6 +28,10 @@ namespace ControleChamados.Models
         public Usuario? Usuario { get; set; }
 
         public List<MensagemChamado> Mensagens { get; set; } = new();
+
+        public int? ResponsavelId { get; set; }
+
+        public Usuario? Responsavel { get; set; }
     }
     
 }

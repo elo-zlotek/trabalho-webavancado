@@ -19,6 +19,8 @@ namespace ControleChamados.DTOs
         public ServicoResumoDto? Servico { get; set; }
 
         public UsuarioResumoDto? Usuario { get; set; }
+
+        public UsuarioResumoDto? Responsavel { get; set; }
     }
 
     public class ServicoResumoDto
