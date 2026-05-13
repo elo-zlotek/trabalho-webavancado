@@ -49,13 +49,25 @@ namespace ControleChamados.Controllers
                 });
             }
 
+            var setor = await _context.Setores
+                .FirstOrDefaultAsync(s => s.Id == dto.SetorId);
+
+            if (setor == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Setor não encontrado."
+                });
+            }
+
             string senhaHash = HashPassword(dto.Senha);
 
             var usuario = new Usuario
             {
                 Nome = dto.Nome,
                 Login = dto.Login,
-                SenhaHash = senhaHash
+                SenhaHash = senhaHash,
+                SetorId = dto.SetorId
             };
 
             _context.Usuarios.Add(usuario);
@@ -69,7 +81,12 @@ namespace ControleChamados.Controllers
                 {
                     Id = usuario.Id,
                     Nome = usuario.Nome,
-                    Login = usuario.Login
+                    Login = usuario.Login,
+                    Setor = new SetorResumoDto
+                    {
+                        Id = setor.Id,
+                        Nome = setor.Nome
+                    }
                 }
             );
         }
@@ -78,8 +95,8 @@ namespace ControleChamados.Controllers
         public async Task<IActionResult> GetByIdAsync(int id)
         {
             var usuario = await _context.Usuarios
-                .FindAsync(id);
-
+                .Include(u => u.Setor)
+                .FirstOrDefaultAsync(u => u.Id == id);
             if (usuario == null)
             {
                 return NotFound();
@@ -89,7 +106,15 @@ namespace ControleChamados.Controllers
             {
                 Id = usuario.Id,
                 Nome = usuario.Nome,
-                Login = usuario.Login
+                Login = usuario.Login,
+
+                Setor = usuario.Setor == null
+                    ? null
+                    : new SetorResumoDto
+                    {
+                        Id = usuario.Setor.Id,
+                        Nome = usuario.Setor.Nome
+                    }
             });
         }
     }

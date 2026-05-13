@@ -15,5 +15,9 @@ namespace ControleChamados.Models
 
         [Required]
         public string Nome { get; set; } = string.Empty;
+
+        public int SetorId { get; set; }
+
+        public Setor? Setor { get; set; }
     }
 }

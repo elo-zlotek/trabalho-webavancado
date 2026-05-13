@@ -7,5 +7,7 @@ namespace ControleChamados.DTOs
         public string Nome { get; set; } = string.Empty;
 
         public string Login { get; set; } = string.Empty;
+
+        public SetorResumoDto? Setor { get; set; }
     }
 }

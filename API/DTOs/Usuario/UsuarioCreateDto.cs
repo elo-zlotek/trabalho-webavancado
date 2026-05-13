@@ -15,5 +15,8 @@ namespace ControleChamados.DTOs
 
         [Required(ErrorMessage = "Confirmar a senha é obrigatório.")]
         public string ConfirmarSenha { get; set; } = string.Empty;
+
+        [Range(1, int.MaxValue, ErrorMessage = "Informe um setor válido.")]
+        public int SetorId { get; set; }
     }
 }
