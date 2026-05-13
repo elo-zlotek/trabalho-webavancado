@@ -13,5 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<Servico> Servicos { get; set; }
     public DbSet<Chamado> Chamados { get; set; }
     public DbSet<Usuario> Usuarios {get; set;}
+
+    public DbSet<MensagemChamado> MensagensChamados { get; set; }
 }
 

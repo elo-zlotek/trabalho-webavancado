@@ -68,28 +68,73 @@ namespace ControleChamados.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Chamado>> GetChamado(int id)
+        public async Task<ActionResult<ChamadoDto>> GetChamado(int id)
         {
             var chamado = await _context.Chamados
                 .Include(c => c.Servico)
-                .ThenInclude(s => s.Setor)
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .Include(c => c.Usuario)
+                .Where(c => c.Id == id)
+                .Select(c => new ChamadoDto
+                {
+                    Id = c.Id,
+                    Titulo = c.Titulo,
+                    Descricao = c.Descricao,
+                    Status = c.Status,
+                    DataCriacao = c.DataCriacao,
+                    PrazoConclusao = c.PrazoConclusao,
+                    DataConclusao = c.DataConclusao,
+
+                    Servico = c.Servico == null ? null : new ServicoResumoDto
+                    {
+                        Id = c.Servico.Id,
+                        Nome = c.Servico.Nome
+                    },
+
+                    Usuario = c.Usuario == null ? null : new UsuarioResumoDto
+                    {
+                        Id = c.Usuario.Id,
+                        Nome = c.Usuario.Nome
+                    }
+                })
+                .FirstOrDefaultAsync();
 
             if (chamado == null)
-            {
                 return NotFound();
-            }
 
-            return chamado;
+            return Ok(chamado);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Chamado>>> GetChamados()
+        public async Task<ActionResult<IEnumerable<ChamadoDto>>> GetChamados()
         {
-            return await _context.Chamados
+            var chamados = await _context.Chamados
                 .Include(c => c.Servico)
-                .ThenInclude(s => s.Setor)
+                .Include(c => c.Usuario)
+                .Select(c => new ChamadoDto
+                {
+                    Id = c.Id,
+                    Titulo = c.Titulo,
+                    Descricao = c.Descricao,
+                    Status = c.Status,
+                    DataCriacao = c.DataCriacao,
+                    PrazoConclusao = c.PrazoConclusao,
+                    DataConclusao = c.DataConclusao,
+
+                    Servico = c.Servico == null ? null : new ServicoResumoDto
+                    {
+                        Id = c.Servico.Id,
+                        Nome = c.Servico.Nome
+                    },
+
+                    Usuario = c.Usuario == null ? null : new UsuarioResumoDto
+                    {
+                        Id = c.Usuario.Id,
+                        Nome = c.Usuario.Nome
+                    }
+                })
                 .ToListAsync();
+
+            return Ok(chamados);
         }
 
         [HttpPut("{id}")]
@@ -140,6 +185,48 @@ namespace ControleChamados.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> AlterarStatus(
+            int id,
+            AlterarStatusChamadoDto dto)
+        {
+            var chamado = await _context.Chamados
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (chamado == null)
+            {
+                return NotFound("Chamado não encontrado.");
+            }
+
+            var statusValidos = new[]
+            {
+                "Aberto",
+                "Em Atendimento",
+                "Aguardando Usuário",
+                "Concluído",
+                "Cancelado"
+            };
+
+            if (!statusValidos.Contains(dto.Status))
+            {
+                return BadRequest(new
+                {
+                    message = "Status inválido."
+                });
+            }
+
+            chamado.Status = dto.Status;
+
+            if (dto.Status == "Concluído")
+            {
+                chamado.DataConclusao = DateTime.Now;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(chamado);
         }
     }
     
