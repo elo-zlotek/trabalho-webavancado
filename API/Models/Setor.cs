@@ -7,7 +7,6 @@ namespace ControleChamados.Models
         [Key] 
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "O nome é obrigatório")]
         public string Nome { get; set; } = string.Empty;
         
         public string? Descricao { get; set; }

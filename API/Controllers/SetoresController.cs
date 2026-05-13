@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ControleChamados.Data;
 using ControleChamados.Models;
+using ControleChamados.DTOs;
 
 namespace ControleChamados.Controllers
 {
@@ -18,44 +19,86 @@ namespace ControleChamados.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Setor>>> GetSetores()
+        public async Task<ActionResult<IEnumerable<SetorDto>>> GetSetores()
         {
-            return await _context.Setores.ToListAsync();
+            var setores = await _context.Setores
+                .Select(s => new SetorDto
+                {
+                    Id = s.Id,
+                    Nome = s.Nome,
+                    Descricao = s.Descricao
+                })
+                .ToListAsync();
+
+            return Ok(setores);
         }
 
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Setor>> GetSetor(int id)
+        public async Task<ActionResult<SetorDto>> GetSetor(int id)
         {
-            var setor = await _context.Setores.FindAsync(id);
-            if (setor == null) return NotFound("Setor não encontrado.");
-            return setor;
+            var setor = await _context.Setores
+                .Where(s => s.Id == id)
+                .Select(s => new SetorDto
+                {
+                    Id = s.Id,
+                    Nome = s.Nome,
+                    Descricao = s.Descricao
+                })
+                .FirstOrDefaultAsync();
+
+            if (setor == null)
+            {
+                return NotFound("Setor não encontrado.");
+            }
+
+            return Ok(setor);
         }
 
   
         [HttpPost]
-        public async Task<ActionResult<Setor>> PostSetor(Setor setor)
+        public async Task<ActionResult<SetorDto>> PostSetor(SetorCreateDto dto)
         {
+            var setor = new Setor
+            {
+                Nome = dto.Nome,
+                Descricao = dto.Descricao
+            };
+
             _context.Setores.Add(setor);
+
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetSetor), new { id = setor.Id }, setor);
+
+            var response = new SetorDto
+            {
+                Id = setor.Id,
+                Nome = setor.Nome,
+                Descricao = setor.Descricao
+            };
+
+            return CreatedAtAction(
+                nameof(GetSetor),
+                new { id = setor.Id },
+                response
+            );
         }
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutSetor(int id, Setor setor)
+        public async Task<IActionResult> PutSetor(int id, SetorCreateDto dto)
         {
-            if (id != setor.Id) return BadRequest();
+            var setor = await _context.Setores
+                .FirstOrDefaultAsync(s => s.Id == id);
 
-            _context.Entry(setor).State = EntityState.Modified;
+            if (setor == null)
+            {
+                return NotFound("Setor não encontrado.");
+            }
 
-            try {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException) {
-                if (!_context.Setores.Any(e => e.Id == id)) return NotFound();
-                throw;
-            }
+            setor.Nome = dto.Nome;
+            setor.Descricao = dto.Descricao;
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
