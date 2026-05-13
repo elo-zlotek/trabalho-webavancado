@@ -3,9 +3,11 @@ using ControleChamados.DTOs;
 using ControleChamados.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ControleChamados.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ChamadosController : ControllerBase
@@ -21,6 +23,16 @@ namespace ControleChamados.Controllers
         [HttpPost]
         public async Task<ActionResult<Chamado>> PostChamado(CriarChamadoDto dto)
         {
+            string? login = User.Identity?.Name;
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Login == login);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
             var servico = await _context.Servicos
                 .FirstOrDefaultAsync(s => s.Id == dto.ServicoId);
 
@@ -36,8 +48,11 @@ namespace ControleChamados.Controllers
                 Titulo = dto.Titulo,
                 Descricao = dto.Descricao,
                 ServicoId = dto.ServicoId,
+                UsuarioId = usuario.Id,
                 DataCriacao = dataCriacao,
-                PrazoConclusao = dataCriacao.AddHours(servico.PrazoHoras),
+                PrazoConclusao = dataCriacao
+                    .AddHours(servico.PrazoHoras),
+
                 Status = "Aberto"
             };
 
@@ -45,7 +60,11 @@ namespace ControleChamados.Controllers
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetChamado), new { id = chamado.Id }, chamado);
+            return CreatedAtAction(
+                nameof(GetChamado),
+                new { id = chamado.Id },
+                chamado
+            );
         }
 
         [HttpGet("{id}")]

@@ -1,49 +1,84 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using ControleChamados.Data;
-using ControleChamados.Services;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.OpenApi.Models;
+    using ControleChamados.Data;
+    using ControleChamados.Services;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.IdentityModel.Tokens;
+    using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
-        connectionString,
-        ServerVersion.AutoDetect(connectionString)
-    )
-);
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseMySql(
+            connectionString,
+            ServerVersion.AutoDetect(connectionString)
+        )
+    );
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("PermitirTudo", policy =>
-        policy.WithOrigins("https://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod());
-});
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("PermitirTudo", policy =>
+            policy.WithOrigins("https://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+    });
 
-builder.Services.AddControllers();
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>{
+                var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
 
-builder.Services.AddEndpointsApiExplorer();
+                options.TokenValidationParameters = new TokenValidationParameters{
+                    ValidateIssuer = false,   
+                    ValidateAudience = false, 
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ClockSkew = TimeSpan.Zero 
+                };
+            });
 
-builder.Services.AddSwaggerGen(c =>
-{
-});
+    builder.Services.AddControllers();
 
-builder.Services.AddSingleton<TokenService>(); 
+    builder.Services.AddEndpointsApiExplorer();
 
-var app = builder.Build();
+    builder.Services.AddSwaggerGen(c => {
+        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme{
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT"
+        });
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement {{
+                new OpenApiSecurityScheme{
+                    Reference = new OpenApiReference{
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+    });
 
-app.UseHttpsRedirection();
+    builder.Services.AddSingleton<TokenService>(); 
 
-app.UseCors("PermitirTudo");
+    var app = builder.Build();
 
-app.MapControllers();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
-app.Run();
+    app.UseHttpsRedirection();
+
+    app.UseAuthentication();
+
+    app.UseAuthorization();
+
+    app.UseCors("PermitirTudo");
+
+    app.MapControllers();
+
+    app.Run();
