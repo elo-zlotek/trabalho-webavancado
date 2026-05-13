@@ -203,12 +203,33 @@ namespace ControleChamados.Controllers
                 return NotFound("Chamado não encontrado.");
             }
 
+            if (chamado.Status == "Concluído")
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Não é possível editar um chamado concluído."
+                });
+            }
+            
+            if (chamado.Status == "Cancelado")
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Não é possível editar um chamado cancelado."
+                });
+            }
+
             var servico = await _context.Servicos
                 .FirstOrDefaultAsync(s => s.Id == dto.ServicoId);
 
             if (servico == null)
             {
-                return NotFound("Serviço não encontrado.");
+                return NotFound(new
+                {
+                    message = "Serviço não encontrado."
+                });
             }
 
             chamado.Titulo = dto.Titulo;
@@ -349,21 +370,12 @@ namespace ControleChamados.Controllers
                 });
             }
 
-            if (chamado.Status == "Concluído")
+            if (chamado.Status != "Aberto")
             {
                 return BadRequest(new
                 {
                     message =
-                        "Não é possível assumir um chamado concluído."
-                });
-            }
-
-            if (chamado.Status == "Cancelado")
-            {
-                return BadRequest(new
-                {
-                    message =
-                        "Não é possível assumir um chamado cancelado."
+                        "Somente chamados abertos podem ser assumidos."
                 });
             }
 
