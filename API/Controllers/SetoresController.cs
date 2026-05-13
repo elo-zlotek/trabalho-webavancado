@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using ControleChamados.Data;
 using ControleChamados.Models;
 using ControleChamados.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ControleChamados.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SetoresController : ControllerBase

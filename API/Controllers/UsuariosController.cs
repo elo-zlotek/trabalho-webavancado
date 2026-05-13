@@ -8,6 +8,7 @@ using static BCrypt.Net.BCrypt;
 
 namespace ControleChamados.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsuariosController : ControllerBase
