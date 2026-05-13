@@ -20,9 +20,7 @@ namespace ControleChamados.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(
-            int chamadoId,
-            CriarMensagemChamadoDto dto)
+        public async Task<IActionResult> CreateAsync(int chamadoId, CriarMensagemChamadoDto dto)
         {
             string? login = User.Identity?.Name;
 
@@ -45,6 +43,24 @@ namespace ControleChamados.Controllers
                 });
             }
 
+            if (chamado.Status == "Concluído")
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Não é possível enviar mensagens em um chamado concluído."
+                });
+            }
+
+            if (chamado.Status == "Cancelado")
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Não é possível enviar mensagens em um chamado cancelado."
+                });
+            }
+
             var mensagem = new MensagemChamado
             {
                 Mensagem = dto.Mensagem,
@@ -64,9 +80,19 @@ namespace ControleChamados.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MensagemChamadoDto>>>
-            GetMensagens(int chamadoId)
+        public async Task<ActionResult<IEnumerable<MensagemChamadoDto>>>GetMensagens(int chamadoId)
         {
+            var chamadoExiste = await _context.Chamados
+                .AnyAsync(c => c.Id == chamadoId);
+
+            if (!chamadoExiste)
+            {
+                return NotFound(new
+                {
+                    message = "Chamado não encontrado."
+                });
+            }
+
             var mensagens = await _context.MensagensChamados
                 .Include(m => m.Usuario)
                 .Where(m => m.ChamadoId == chamadoId)
