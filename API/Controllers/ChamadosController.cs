@@ -217,6 +217,36 @@ namespace ControleChamados.Controllers
                 });
             }
 
+            bool transicaoValida = chamado.Status switch
+            {
+                "Aberto" =>
+                    dto.Status == "Em Atendimento" ||
+                    dto.Status == "Cancelado",
+
+                "Em Atendimento" =>
+                    dto.Status == "Aguardando Usuário" ||
+                    dto.Status == "Concluído" ||
+                    dto.Status == "Cancelado",
+
+                "Aguardando Usuário" =>
+                    dto.Status == "Em Atendimento",
+
+                "Concluído" => false,
+
+                "Cancelado" => false,
+
+                _ => false
+            };
+
+            if (!transicaoValida)
+            {
+                return BadRequest(new
+                {
+                    message =
+                        $"Não é possível alterar de '{chamado.Status}' para '{dto.Status}'."
+                });
+            }
+
             chamado.Status = dto.Status;
 
             if (dto.Status == "Concluído")
@@ -226,7 +256,10 @@ namespace ControleChamados.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(chamado);
+            return Ok(new
+            {
+                message = "Status atualizado com sucesso."
+            });
         }
     }
     
