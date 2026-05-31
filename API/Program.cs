@@ -20,7 +20,7 @@
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("PermitirTudo", policy =>
-            policy.WithOrigins("https://localhost:3000")
+            policy.WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod());
     });
@@ -65,20 +65,19 @@
 
     var app = builder.Build();
 
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
-    app.UseHttpsRedirection();
+app.UseCors("PermitirTudo");
 
-    app.UseAuthentication();
 
-    app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
-    app.UseCors("PermitirTudo");
+// 2. O mapeamento fica por último
+app.MapControllers();
 
-    app.MapControllers();
-
-    app.Run();
+app.Run();
