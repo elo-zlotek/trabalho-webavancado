@@ -170,5 +170,31 @@ namespace ControleChamados.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpGet("setor/{setorId}")]
+        public async Task<ActionResult<IEnumerable<ServicoDto>>> GetServicosPorSetor(int setorId)
+        {
+            var servicos = await _context.Servicos
+                .Include(s => s.Setor)
+                .Where(s => s.SetorId == setorId)
+                .Select(s => new ServicoDto
+                {
+                    Id = s.Id,
+                    Nome = s.Nome,
+                    Descricao = s.Descricao,
+                    PrazoHoras = s.PrazoHoras,
+
+                    Setor = s.Setor == null
+                        ? null
+                        : new SetorResumoDto
+                        {
+                            Id = s.Setor.Id,
+                            Nome = s.Setor.Nome
+                        }
+                })
+                .ToListAsync();
+
+            return Ok(servicos);
+        }
     }
 }
