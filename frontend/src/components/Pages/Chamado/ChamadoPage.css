@@ -1,0 +1,121 @@
+.chamado-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: #666;
+}
+
+.form-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-section form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #0d6efd;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-group select:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+button[type="submit"] {
+    align-self: flex-start;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    background-color: #0d6efd;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button[type="submit"]:hover {
+    background-color: #0b5ed7;
+}
+
+.mensagem-erro {
+    color: #dc3545;
+    font-weight: 500;
+    margin: 0;
+}
+
+.servico-info {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    border-left: 4px solid #0d6efd;
+}
+
+.servico-info h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+}
+
+.servico-info p {
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .chamado-page {
+        padding: 16px;
+    }
+
+    .form-section {
+        padding: 16px;
+    }
+
+    button[type="submit"] {
+        width: 100%;
+    }
+}
