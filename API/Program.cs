@@ -38,7 +38,12 @@
                 };
             });
 
-    builder.Services.AddControllers();
+    builder.Services
+        .AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.PropertyNamingPolicy = null;
+        });
 
     builder.Services.AddEndpointsApiExplorer();
 
@@ -62,6 +67,7 @@
     });
 
     builder.Services.AddSingleton<TokenService>(); 
+    builder.Services.AddScoped<UsuarioLogadoService>();
 
     var app = builder.Build();
 

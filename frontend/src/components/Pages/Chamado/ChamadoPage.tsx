@@ -1,6 +1,6 @@
 import React, { useEffect, useState, ChangeEvent } from "react";
 import api from "../../../api/api";
-
+import toast from "react-hot-toast";
 import CriarChamadoDto from "../../../DTOs/Chamado/CriarChamadoDto";
 import ServicoDto from "../../../DTOs/Servico/ServicoDto";
 import SetorDto from "../../../DTOs/Setor/SetorDto";
@@ -10,12 +10,8 @@ import "./ChamadoPage.css";
 export default function ChamadoPage() {
     const [setores, setSetores] = useState<SetorDto[]>([]);
     const [servicos, setServicos] = useState<ServicoDto[]>([]);
-
     const [loading, setLoading] = useState<boolean>(true);
-    const [erro, setErro] = useState<string>("");
-
     const [setorId, setSetorId] = useState<number>(0);
-
     const [formData, setFormData] = useState<CriarChamadoDto>({
         Titulo: "",
         Descricao: "",
@@ -41,7 +37,7 @@ export default function ChamadoPage() {
         }
         catch (error) {
             console.error(error);
-            setErro("Erro ao carregar os setores.");
+            toast.error("Erro ao carregar os setores.");
         }
         finally {
             setLoading(false);
@@ -61,7 +57,7 @@ export default function ChamadoPage() {
         }
         catch (error) {
             console.error(error);
-            setErro("Erro ao carregar os serviços.");
+            toast.error("Erro ao carregar os serviços.");
         }
     }
 
@@ -112,15 +108,13 @@ export default function ChamadoPage() {
 
         try {
 
-            setErro("");
-
             if (!formData.Titulo.trim()) {
-                setErro("Informe o título.");
+                toast.error("Informe o título.");
                 return;
             }
 
             if (formData.ServicoId <= 0) {
-                setErro("Selecione um serviço.");
+                toast.error("Selecione um serviço.");
                 return;
             }
 
@@ -129,7 +123,7 @@ export default function ChamadoPage() {
                 formData
             );
 
-            alert("Chamado criado com sucesso.");
+            toast.success("Chamado criado com sucesso!");
 
             setSetorId(0);
 
@@ -149,7 +143,7 @@ export default function ChamadoPage() {
                 error?.response?.data?.message ||
                 "Erro ao criar chamado.";
 
-            setErro(mensagem);
+            toast.error(mensagem);
         }
     }
 
@@ -274,15 +268,6 @@ export default function ChamadoPage() {
                             onChange={handleInputChange}
                         />
                     </div>
-
-                    {erro && (
-                        <p
-                            className="mensagem-erro"
-                            role="alert"
-                        >
-                            {erro}
-                        </p>
-                    )}
 
                     <button type="submit">
                         Abrir Chamado

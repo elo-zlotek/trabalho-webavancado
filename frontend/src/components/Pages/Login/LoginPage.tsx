@@ -1,4 +1,6 @@
 import React, { ChangeEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import api from "../../../api/api";
 import LoginDto from "../../../DTOs/Login/LoginDto";
 import "./LoginPage.css";
@@ -10,7 +12,8 @@ export default function LoginPage() {
     });
 
     const [loading, setLoading] = useState<boolean>(false);
-    const [erro, setErro] = useState<string>("");
+
+    const navigate = useNavigate();
 
     function handleInputChange(
         event: ChangeEvent<HTMLInputElement>
@@ -28,13 +31,12 @@ export default function LoginPage() {
     ): Promise<void> {
         event.preventDefault();
         if (!formData.Login.trim() || !formData.Senha.trim()) {
-            setErro("Usuário e senha são obrigatórios.");
+            toast.error("Usuário e senha são obrigatórios.");
             return; 
         }
 
         try {
             setLoading(true);
-            setErro("");
 
             const response = await api.post("/api/Auth/login", formData);
 
@@ -42,15 +44,13 @@ export default function LoginPage() {
             localStorage.setItem("usuario", response.data.usuario);
             localStorage.setItem("nome", response.data.nome);
 
-            window.location.href = "/";
+            toast.success("Login realizado com sucesso!");
+            navigate("/chamados");
+
         } catch (error: any) {
             console.error(error);
 
-            const mensagem =
-                error?.response?.data?.message ||
-                "Erro ao realizar login.";
-
-            setErro(mensagem);
+            toast.error("Erro ao realizar login.");
         } finally {
             setLoading(false);
         }
@@ -98,15 +98,6 @@ export default function LoginPage() {
                             placeholder="Digite sua senha"
                         />
                     </div>
-
-                    {erro && (
-                        <p
-                            className="mensagem-erro"
-                            role="alert"
-                        >
-                            {erro}
-                        </p>
-                    )}
 
                     <button
                         type="submit"

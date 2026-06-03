@@ -1,5 +1,7 @@
 import React, { useEffect, useState, ChangeEvent } from "react";
 import api from "../../../api/api";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import ServicoDto from "../../../DTOs/Servico/ServicoDto";
 import CriarServicoDto from "../../../DTOs/Servico/CriarServicoDto";
 import SetorDto from "../../../DTOs/Setor/SetorDto";
@@ -9,7 +11,6 @@ export default function ServicoPage() {
     const [servicos, setServicos] = useState<ServicoDto[]>([]);
     const [setores, setSetores] = useState<SetorDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [erro, setErro] = useState<string>("");
 
     const [modoEdicao, setModoEdicao] = useState<boolean>(false);
     const [servicoEditandoId, setServicoEditandoId] = useState<number | null>(null);
@@ -28,7 +29,6 @@ export default function ServicoPage() {
     async function carregarDadosIniciais(): Promise<void> {
         try {
             setLoading(true);
-            setErro("");
             
             const [resServicos, resSetores] = await Promise.all([
                 api.get<ServicoDto[]>("/api/Servicos"),
@@ -39,7 +39,7 @@ export default function ServicoPage() {
             setSetores(resSetores.data);
         } catch (error) {
             console.error(error);
-            setErro("Erro ao carregar os dados do sistema.");
+            toast.error("Erro ao carregar os dados do sistema.");
         } finally {
             setLoading(false);
         }
@@ -51,7 +51,7 @@ export default function ServicoPage() {
             setServicos(response.data);
         } catch (error) {
             console.error(error);
-            setErro("Erro ao atualizar a lista de serviços.");
+            toast.error("Erro ao atualizar a lista de serviços.");
         }
     }
 
@@ -72,7 +72,6 @@ export default function ServicoPage() {
         event.preventDefault();
 
         try {
-            setErro("");
 
             const payload: CriarServicoDto = {
                 Nome: formData.Nome.trim(),
@@ -82,26 +81,26 @@ export default function ServicoPage() {
             };
 
             if (!payload.Nome) {
-                setErro("O nome do serviço é obrigatório.");
+                toast.error("O nome do serviço é obrigatório.");
                 return;
             }
 
             if (payload.SetorId <= 0) {
-                setErro("Você precisa selecionar um setor válido.");
+                toast.error("Você precisa selecionar um setor válido.");
                 return;
             }
 
             if (payload.PrazoHoras < 1 || payload.PrazoHoras > 720) {
-                setErro("O prazo deve estar entre 1 e 720 horas.");
+                toast.error("O prazo deve estar entre 1 e 720 horas.");
                 return;
             }
 
             if (modoEdicao && servicoEditandoId !== null) {
                 await api.put(`/api/Servicos/${servicoEditandoId}`, payload);
-                alert("Serviço atualizado com sucesso.");
+                toast.success("Serviço atualizado com sucesso.");
             } else {
                 await api.post("/api/Servicos", payload);
-                alert("Serviço cadastrado com sucesso.");
+                toast.success("Serviço cadastrado com sucesso.");
             }
 
             limparFormulario();
@@ -109,7 +108,7 @@ export default function ServicoPage() {
         } catch (error: any) {
             console.error(error);
             const mensagem = error?.response?.data?.message || "Erro ao salvar o serviço.";
-            setErro(mensagem);
+            toast.error(mensagem);
         }
     }
 
@@ -128,17 +127,38 @@ export default function ServicoPage() {
     }
 
     async function excluirServico(id: number): Promise<void> {
-        const confirmar = window.confirm("Tem certeza que deseja excluir este serviço?");
-        if (!confirmar) return;
+
+        const resultado = await Swal.fire({
+            title: "Excluir serviço?",
+            text: "Esta ação não poderá ser desfeita.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, excluir",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        });
+
+        if (!resultado.isConfirmed) {
+            return;
+        }
 
         try {
+
             await api.delete(`/api/Servicos/${id}`);
-            alert("Serviço excluído com sucesso.");
+
+            toast.success("Serviço excluído com sucesso.");
+
             await carregarServicos();
+
         } catch (error: any) {
+
             console.error(error);
-            const mensagem = error?.response?.data?.message || "Erro ao excluir serviço. Verifique se existem chamados vinculados.";
-            alert(mensagem);
+
+            const mensagem =
+                error?.response?.data?.message ||
+                "Erro ao excluir serviço.";
+
+            toast.error(mensagem);
         }
     }
 
@@ -151,7 +171,6 @@ export default function ServicoPage() {
             PrazoHoras: 24,
             SetorId: setores.length > 0 ? setores[0].Id : 0,
         });
-        setErro("");
     }
 
     return (
@@ -231,12 +250,6 @@ export default function ServicoPage() {
                                 placeholder="Detalhes sobre o que envolve este serviço..."
                             />
                         </div>
-
-                        {erro && (
-                            <p className="mensagem-erro" role="alert">
-                                {erro}
-                            </p>
-                        )}
 
                         <div className="button-group">
                             <button type="submit">

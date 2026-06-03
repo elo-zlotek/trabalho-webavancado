@@ -1,13 +1,14 @@
 import React, { useEffect, useState, ChangeEvent } from "react";
+import toast from "react-hot-toast";
 import api from "../../../api/api";
 import SetorDto from "../../../DTOs/Setor/SetorDto";
 import SetorCreateDto from "../../../DTOs/Setor/SetorCreateDto";
 import "./SetorPage.css";
+import Swal from "sweetalert2";
 
 export default function SetorPage() {
     const [setores, setSetores] = useState<SetorDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [erro, setErro] = useState<string>("");
 
     const [modoEdicao, setModoEdicao] = useState<boolean>(false);
     const [setorEditandoId, setSetorEditandoId] = useState<number | null>(null);
@@ -24,13 +25,12 @@ export default function SetorPage() {
     async function carregarSetores(): Promise<void> {
         try {
             setLoading(true);
-            setErro("");
 
             const response = await api.get<SetorDto[]>("/api/Setores");
             setSetores(response.data);
         } catch (error) {
             console.error(error);
-            setErro("Erro ao carregar setores.");
+            toast.error("Erro ao carregar setores.");
         } finally {
             setLoading(false);
         }
@@ -53,7 +53,6 @@ export default function SetorPage() {
         event.preventDefault();
 
         try {
-            setErro("");
 
             const payload: SetorCreateDto = {
                 Nome: formData.Nome.trim(),
@@ -61,7 +60,7 @@ export default function SetorPage() {
             };
 
             if (!payload.Nome) {
-                setErro("O nome do setor é obrigatório.");
+                toast.error("O nome do setor é obrigatório.");
                 return;
             }
 
@@ -71,11 +70,11 @@ export default function SetorPage() {
                     payload
                 );
 
-                alert("Setor atualizado com sucesso.");
+                toast.success("Setor atualizado com sucesso.");
             } else {
                 await api.post("/api/Setores", payload);
 
-                alert("Setor cadastrado com sucesso.");
+                toast.success("Setor cadastrado com sucesso.");
             }
 
             limparFormulario();
@@ -87,7 +86,7 @@ export default function SetorPage() {
                 error?.response?.data?.message ||
                 "Erro ao salvar setor.";
 
-            setErro(mensagem);
+            toast.error(mensagem);
         }
     }
 
@@ -107,26 +106,38 @@ export default function SetorPage() {
     }
 
     async function excluirSetor(id: number): Promise<void> {
-        const confirmar = window.confirm(
-            "Tem certeza que deseja excluir este setor?"
-        );
 
-        if (!confirmar) return;
+        const resultado = await Swal.fire({
+            title: "Excluir setor?",
+            text: "Esta ação não poderá ser desfeita.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, excluir",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        });
+
+        if (!resultado.isConfirmed) {
+            return;
+        }
 
         try {
+
             await api.delete(`/api/Setores/${id}`);
 
-            alert("Setor excluído com sucesso.");
+            toast.success("Setor excluído com sucesso.");
 
             await carregarSetores();
+
         } catch (error: any) {
+
             console.error(error);
 
             const mensagem =
                 error?.response?.data?.message ||
                 "Erro ao excluir setor.";
 
-            alert(mensagem);
+            toast.error(mensagem);
         }
     }
 
@@ -138,8 +149,6 @@ export default function SetorPage() {
             Nome: "",
             Descricao: "",
         });
-
-        setErro("");
     }
 
     return (
@@ -196,15 +205,6 @@ export default function SetorPage() {
                                 placeholder="Digite a descrição do setor"
                             />
                         </div>
-
-                        {erro && (
-                            <p
-                                className="mensagem-erro"
-                                role="alert"
-                            >
-                                {erro}
-                            </p>
-                        )}
 
                         <div className="button-group">
                             <button type="submit">
