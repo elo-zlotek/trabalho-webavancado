@@ -21,6 +21,10 @@ export default function ListaChamadosPage() {
         carregarChamados();
     }, [abaAtiva]);
 
+    useEffect(() => {
+        console.log("STATE CHAMADOS:", JSON.stringify(chamados, null, 2));
+    }, [chamados]);
+
     async function carregarChamados(): Promise<void> {
 
         try {
@@ -147,17 +151,17 @@ export default function ListaChamadosPage() {
 
                                 <p>
                                     <strong>Serviço:</strong>{" "}
-                                    {chamado.Servico?.Nome}
+                                    {chamado.NomeServico}
                                 </p>
 
                                 <p>
                                     <strong>Solicitante:</strong>{" "}
-                                    {chamado.Usuario?.Nome}
+                                    {chamado.NomeSolicitante}
                                 </p>
 
                                 <p>
                                     <strong>Responsável:</strong>{" "}
-                                    {chamado.Responsavel?.Nome ||
+                                    {chamado.NomeResponsavel ||
                                         "Não atribuído"}
                                 </p>
 

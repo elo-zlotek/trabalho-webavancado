@@ -1,59 +1,81 @@
 .chamados-page {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 2.5rem 1.5rem;
+    background-color: #f8fafc;
+    min-height: 100vh;
 }
 
 .page-header {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
 
 .page-header h1 {
-    margin-bottom: .5rem;
+    font-size: 2rem;
+    color: #0f172a;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
 }
 
 .page-header p {
-    color: #666;
+    color: #64748b;
+    font-size: 1rem;
 }
 
 .tabs-container {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    display: inline-flex;
+    background: #e2e8f0;
+    padding: 0.35rem;
+    border-radius: 12px;
+    margin-bottom: 2.5rem;
+    gap: 0.25rem;
 }
 
 .tab {
     border: none;
-    background: #e5e7eb;
-    padding: .75rem 1.5rem;
-    border-radius: 10px;
+    background: transparent;
+    padding: 0.6rem 1.2rem;
+    border-radius: 9px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 0.925rem;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.tab:hover {
+    color: #334155;
 }
 
 .tab.active {
-    background: #2563eb;
-    color: white;
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .cards-container {
     display: grid;
-    grid-template-columns:
-        repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
 }
 
 .chamado-card {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    padding: 1rem;
-    transition: .2s;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .chamado-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    transform: translateY(-4px);
+    border-color: #cbd5e1;
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
 }
 
 .card-header {
@@ -64,45 +86,85 @@
 }
 
 .card-id {
-    font-weight: bold;
-    color: #666;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #94a3b8;
+    background: #f1f5f9;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+}
+
+.chamado-card h3 {
+    font-size: 1.125rem;
+    color: #1e293b;
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 0 0 1.25rem 0;
 }
 
 .card-info {
     display: flex;
     flex-direction: column;
-    gap: .4rem;
+    gap: 0.6rem;
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 1.25rem;
+}
+
+.card-info p {
+    font-size: 0.875rem;
+    color: #475569;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-info p strong {
+    color: #94a3b8;
+    font-weight: 500;
 }
 
 .status {
-    padding: .35rem .75rem;
+    padding: 0.25rem 0.75rem;
     border-radius: 999px;
-    font-size: .8rem;
+    font-size: 0.75rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .status-aberto {
-    background: #dbeafe;
+    background: #eff6ff;
+    color: #1d4ed8;
 }
 
 .status-em-atendimento {
-    background: #fef3c7;
+    background: #fffbeb;
+    color: #b45309;
 }
 
-.status-aguardando-usuário {
-    background: #fce7f3;
+.status-aguardando-usuario { 
+    background: #fdf2f8;
+    color: #be185d;
 }
 
-.status-concluído {
-    background: #dcfce7;
+.status-concluido {
+    background: #f0fdf4;
+    color: #15803d;
 }
 
 .status-cancelado {
-    background: #fee2e2;
+    background: #fef2f2;
+    color: #b91c1c;
 }
 
 .loading,
 .empty-state {
     text-align: center;
-    padding: 3rem;
+    padding: 5rem 2rem;
+    background: #ffffff;
+    border: 2px dashed #e2e8f0;
+    border-radius: 16px;
+    color: #64748b;
+    font-weight: 500;
 }
