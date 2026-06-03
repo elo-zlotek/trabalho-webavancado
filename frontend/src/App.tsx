@@ -9,6 +9,8 @@ import MensagemChamadoPage from './components/Pages/MensagemChamado/MensagemCham
 import MainLayout from './components/Layout/MainLayout';
 import ProtectedRoute from './auth/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
+import ListaChamadosPage from './components/Pages/Chamado/ListaChamadosPage';
+import ChamadoDetalhePage from './components/Pages/Chamado/ChamadoDetalhePage';
 
 function App() {
   return (
@@ -32,7 +34,8 @@ function App() {
         <Route path="/servicos" element={<ServicoPage />} />
         <Route path="/usuarios" element={<UsuarioPage />} />
         <Route path="/mensagens" element={<MensagemChamadoPage />} />
-        <Route path="/chamados" element={<ChamadoPage />} />
+        <Route path="/chamados" element={<ListaChamadosPage />} />
+        <Route path="/chamados/:id" element={<ChamadoDetalhePage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Route>
     </Routes>

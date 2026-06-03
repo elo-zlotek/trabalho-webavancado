@@ -33,6 +33,7 @@ namespace ControleChamados.Controllers
             }
 
             var chamado = await _context.Chamados
+                .Include(c => c.Servico)
                 .FirstOrDefaultAsync(c => c.Id == chamadoId);
 
             if (chamado == null)

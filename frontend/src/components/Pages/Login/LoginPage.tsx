@@ -39,6 +39,7 @@ export default function LoginPage() {
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("usuario", response.data.usuario);
             localStorage.setItem("nome", response.data.nome);
+            localStorage.setItem("usuarioId", response.data.usuarioId);
 
             toast.success("Login realizado com sucesso!");
             navigate("/chamados");

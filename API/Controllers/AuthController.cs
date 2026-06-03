@@ -55,7 +55,8 @@ namespace ControleChamados.Controllers
             {
                 token,
                 nome = usuario.Nome,
-                usuario = usuario.Login
+                usuario = usuario.Login,
+                usuarioId = usuario.Id
             });
         }
     }
