@@ -4,12 +4,13 @@ import UsuarioDto from "../../../DTOs/Usuario/UsuarioDto";
 import UsuarioCreateDto from "../../../DTOs/Usuario/UsuarioCreateDto";
 import SetorDto from "../../../DTOs/Setor/SetorDto";
 import "./UsuarioPage.css";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 export default function UsuarioPage() {
     const [usuarios, setUsuarios] = useState<UsuarioDto[]>([]);
     const [setores, setSetores] = useState<SetorDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [erro, setErro] = useState<string>("");
 
     const [modoEdicao, setModoEdicao] = useState<boolean>(false);
     const [usuarioEditandoId, setUsuarioEditandoId] = useState<number | null>(null);
@@ -29,7 +30,6 @@ export default function UsuarioPage() {
     async function carregarDadosIniciais(): Promise<void> {
         try {
             setLoading(true);
-            setErro("");
 
             const [resUsuarios, resSetores] = await Promise.all([
                 api.get<UsuarioDto[]>("/api/Usuarios"),
@@ -40,7 +40,7 @@ export default function UsuarioPage() {
             setSetores(resSetores.data);
         } catch (error) {
             console.error(error);
-            setErro("Erro ao carregar dados de usuários e setores.");
+            toast.error("Erro ao carregar dados de usuários e setores.");
         } finally {
             setLoading(false);
         }
@@ -52,7 +52,7 @@ export default function UsuarioPage() {
             setUsuarios(response.data);
         } catch (error) {
             console.error(error);
-            setErro("Erro ao atualizar a lista de usuários.");
+            toast.error("Erro ao atualizar a lista de usuários.");
         }
     }
 
@@ -73,7 +73,6 @@ export default function UsuarioPage() {
         event.preventDefault();
 
         try {
-            setErro("");
 
             const payload: UsuarioCreateDto = {
                 Nome: formData.Nome.trim(),
@@ -84,32 +83,32 @@ export default function UsuarioPage() {
             };
 
             if (!payload.Nome || !payload.Login) {
-                setErro("Nome e Usuário (Login) são obrigatórios.");
+                toast.error("Nome e Usuário (Login) são obrigatórios.");
                 return;
             }
 
             if (payload.SetorId <= 0) {
-                setErro("Selecione um setor válido para o usuário.");
+                toast.error("Selecione um setor válido para o usuário.");
                 return;
             }
 
             if (!modoEdicao) {
                 if (!payload.Senha) {
-                    setErro("A senha é obrigatória para novos cadastros.");
+                    toast.error("A senha é obrigatória para novos cadastros.");
                     return;
                 }
                 if (payload.Senha !== payload.ConfirmarSenha) {
-                    setErro("A senha e a confirmação de senha não coincidem.");
+                    toast.error("A senha e a confirmação de senha não coincidem.");
                     return;
                 }
             }
 
             if (modoEdicao && usuarioEditandoId !== null) {
                 await api.put(`/api/Usuarios/${usuarioEditandoId}`, payload);
-                alert("Usuário atualizado com sucesso.");
+                toast.success("Usuário atualizado com sucesso.");
             } else {
                 await api.post("/api/Usuarios", payload);
-                alert("Usuário cadastrado com sucesso.");
+                toast.success("Usuário cadastrado com sucesso.");
             }
 
             limparFormulario();
@@ -117,7 +116,7 @@ export default function UsuarioPage() {
         } catch (error: any) {
             console.error(error);
             const mensagem = error?.response?.data?.message || "Erro ao salvar o usuário.";
-            setErro(mensagem);
+            toast.error(mensagem);
         }
     }
 
@@ -137,17 +136,38 @@ export default function UsuarioPage() {
     }
 
     async function excluirUsuario(id: number): Promise<void> {
-        const confirmar = window.confirm("Tem certeza que deseja excluir este usuário?");
-        if (!confirmar) return;
+
+        const resultado = await Swal.fire({
+            title: "Excluir usuário?",
+            text: "Esta ação não poderá ser desfeita.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, excluir",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        });
+
+        if (!resultado.isConfirmed) {
+            return;
+        }
 
         try {
+
             await api.delete(`/api/Usuarios/${id}`);
-            alert("Usuário excluído com sucesso.");
+
+            toast.success("Usuário excluído com sucesso.");
+
             await carregarUsuarios();
+
         } catch (error: any) {
+
             console.error(error);
-            const mensagem = error?.response?.data?.message || "Erro ao excluir usuário.";
-            alert(mensagem);
+
+            const mensagem =
+                error?.response?.data?.message ||
+                "Erro ao excluir usuário.";
+
+            toast.error(mensagem);
         }
     }
 
@@ -161,7 +181,6 @@ export default function UsuarioPage() {
             ConfirmarSenha: "",
             SetorId: setores.length > 0 ? setores[0].Id : 0,
         });
-        setErro("");
     }
 
     return (
@@ -255,12 +274,6 @@ export default function UsuarioPage() {
                                     />
                                 </div>
                             </>
-                        )}
-
-                        {erro && (
-                            <p className="mensagem-erro" role="alert">
-                                {erro}
-                            </p>
                         )}
 
                         <div className="button-group">
