@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../api/api";
 import toast from "react-hot-toast";
-
+import { useNavigate } from "react-router-dom";
 import ChamadoListaDto from "../../../DTOs/Chamado/ChamadoListaDto";
 
 import "./ListaChamadosPage.css";
 
 export default function ListaChamadosPage() {
+    const navigate = useNavigate();
 
     const [abaAtiva, setAbaAtiva] =
         useState<"meus" | "atendimentos">("meus");
@@ -21,9 +22,9 @@ export default function ListaChamadosPage() {
         carregarChamados();
     }, [abaAtiva]);
 
-    useEffect(() => {
-        console.log("STATE CHAMADOS:", JSON.stringify(chamados, null, 2));
-    }, [chamados]);
+    function abrirChamado(id: number) {
+        navigate(`/chamados/${id}`);
+    }
 
     async function carregarChamados(): Promise<void> {
 
@@ -124,6 +125,8 @@ export default function ListaChamadosPage() {
                         <article
                             key={chamado.Id}
                             className="chamado-card"
+                            onClick={() => abrirChamado(chamado.Id)}
+                            style={{ cursor: "pointer" }}
                         >
 
                             <div className="card-header">
