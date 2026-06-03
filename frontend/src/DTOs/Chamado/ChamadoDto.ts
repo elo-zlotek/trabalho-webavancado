@@ -1,6 +1,7 @@
 export interface ServicoResumoDto {
     Id: number;
     Nome: string;
+    SetorId: number;
 }
 
 export interface UsuarioResumoDto {

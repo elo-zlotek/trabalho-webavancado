@@ -29,7 +29,8 @@ api.interceptors.response.use(
             localStorage.removeItem("token");
             localStorage.removeItem("usuario");
             localStorage.removeItem("nome");
-
+            localStorage.removeItem("usuarioId");
+            localStorage.removeItem("usuarioSetorId");
             window.location.href = "/login";
         }
 

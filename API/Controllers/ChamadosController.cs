@@ -156,6 +156,7 @@ namespace ControleChamados.Controllers
                     {
                         Id = chamado.Servico.Id,
                         Nome = chamado.Servico.Nome
+                        SetorId = chamado.Servico.SetorId
                     },
 
                 Usuario = chamado.Usuario == null
@@ -450,7 +451,10 @@ namespace ControleChamados.Controllers
 
             if (usuario.SetorId != chamado.Servico.SetorId)
             {
-                return Forbid();
+                return StatusCode(403, new
+                {
+                    message = "Você não tem permissão para assumir este chamado."
+                });
             }
 
             if (chamado.ResponsavelId != null)

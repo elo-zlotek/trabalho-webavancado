@@ -56,7 +56,8 @@ namespace ControleChamados.Controllers
                 token,
                 nome = usuario.Nome,
                 usuario = usuario.Login,
-                usuarioId = usuario.Id
+                usuarioId = usuario.Id,
+                usuarioSetorId = usuario.SetorId
             });
         }
     }

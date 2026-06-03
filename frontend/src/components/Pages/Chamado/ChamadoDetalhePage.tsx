@@ -233,8 +233,7 @@ export default function ChamadoDetalhePage() {
         usuarioEhResponsavel;
 
     const mostrarBotaoAssumir =
-        chamado.Status === "Aberto" &&
-        !chamado.Responsavel;
+        chamado.Status === "Aberto" && !chamado.Responsavel && chamado.Servico && chamado.Servico.SetorId === Number(localStorage.getItem("usuarioSetorId"));
 
     return (
         <main className="chamado-detalhe-page">
