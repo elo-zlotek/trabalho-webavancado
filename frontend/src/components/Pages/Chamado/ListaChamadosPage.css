@@ -8,19 +8,24 @@
 
 .page-header {
     margin-bottom: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
+.page-header button {
+    padding: .5rem .9rem;
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
 
-.page-header h1 {
-    font-size: 2rem;
-    color: #0f172a;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.025em;
+    width: fit-content;
+    flex-shrink: 0;
 }
-
-.page-header p {
-    color: #64748b;
-    font-size: 1rem;
+.page-header button:hover {
+    background: #1d4ed8;
 }
 
 .tabs-container {

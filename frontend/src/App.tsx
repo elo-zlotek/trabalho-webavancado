@@ -34,6 +34,7 @@ function App() {
         <Route path="/servicos" element={<ServicoPage />} />
         <Route path="/usuarios" element={<UsuarioPage />} />
         <Route path="/mensagens" element={<MensagemChamadoPage />} />
+        <Route path="/novoChamado" element={<ChamadoPage />} />
         <Route path="/chamados" element={<ListaChamadosPage />} />
         <Route path="/chamados/:id" element={<ChamadoDetalhePage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />

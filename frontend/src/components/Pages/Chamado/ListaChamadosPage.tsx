@@ -66,14 +66,14 @@ export default function ListaChamadosPage() {
         <main className="chamados-page">
 
             <header className="page-header">
+                <div>
+                    <h1>Chamados</h1>
+                    <p>Consulte seus chamados e os atendimentos do seu setor.</p>
+                </div>
 
-                <h1>Chamados</h1>
-
-                <p>
-                    Consulte seus chamados e os
-                    atendimentos do seu setor.
-                </p>
-
+                <button onClick={() => navigate("/novoChamado")}>
+                    Novo chamado
+                </button>
             </header>
 
             <section className="tabs-container">
