@@ -67,6 +67,7 @@
     });
 
     builder.Services.AddSingleton<TokenService>(); 
+    builder.Services.AddScoped<UsuarioLogadoService>();
 
     var app = builder.Build();
 

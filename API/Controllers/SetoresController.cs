@@ -57,7 +57,7 @@ namespace ControleChamados.Controllers
             return Ok(setor);
         }
 
-  
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<SetorDto>> PostSetor(SetorCreateDto dto)
         {
