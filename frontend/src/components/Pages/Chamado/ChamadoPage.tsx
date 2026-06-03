@@ -4,8 +4,10 @@ import toast from "react-hot-toast";
 import CriarChamadoDto from "../../../DTOs/Chamado/CriarChamadoDto";
 import ServicoDto from "../../../DTOs/Servico/ServicoDto";
 import SetorDto from "../../../DTOs/Setor/SetorDto";
+import { useNavigate, useParams } from "react-router-dom";
 
 import "./ChamadoPage.css";
+import ChamadoDto from "../../../DTOs/Chamado/ChamadoDto";
 
 export default function ChamadoPage() {
     const [setores, setSetores] = useState<SetorDto[]>([]);
@@ -18,13 +20,57 @@ export default function ChamadoPage() {
         ServicoId: 0
     });
 
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const modoEdicao = !!id;
+
     const servicoSelecionado = servicos.find(
         s => s.Id === formData.ServicoId
     );
 
     useEffect(() => {
         carregarSetores();
-    }, []);
+
+        if (id) {
+            carregarChamado(Number(id));
+        }
+
+    }, [id]);
+
+    async function carregarChamado(chamadoId: number): Promise<void> {
+
+        try {
+
+            const response = await api.get<ChamadoDto>(`/api/Chamados/${chamadoId}`);
+
+            const chamado = response.data;
+
+            setFormData({
+                Titulo: chamado.Titulo,
+                Descricao: chamado.Descricao || "",
+                ServicoId: chamado.Servico?.Id || 0
+            });
+
+            if (chamado.Servico?.SetorId) {
+
+                setSetorId(
+                    chamado.Servico.SetorId
+                );
+
+                await carregarServicos(
+                    chamado.Servico.SetorId
+                );
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+            toast.error(
+                "Erro ao carregar chamado."
+            );
+        }
+    }
 
     async function carregarSetores(): Promise<void> {
         try {
@@ -118,10 +164,24 @@ export default function ChamadoPage() {
                 return;
             }
 
-            await api.post(
-                "/api/Chamados",
-                formData
-            );
+            if (modoEdicao) {
+
+                await api.put(
+                    `/api/Chamados/${id}`,
+                    formData
+                );
+
+                toast.success("Chamado atualizado com sucesso.");
+
+            } else {
+
+                await api.post(
+                    "/api/Chamados",
+                    formData
+                );
+
+                toast.success("Chamado criado com sucesso!");
+            }
 
             toast.success("Chamado criado com sucesso!");
 
@@ -134,6 +194,8 @@ export default function ChamadoPage() {
                 Descricao: "",
                 ServicoId: 0
             });
+
+            navigate("/chamados");
         }
         catch (error: any) {
 
@@ -155,7 +217,11 @@ export default function ChamadoPage() {
         <main className="chamado-page">
 
             <header className="page-header">
-                <h1>Abertura de Chamado</h1>
+                <h1>
+                    {modoEdicao
+                        ? "Editar Chamado"
+                        : "Abertura de Chamado"}
+                </h1>
                 <p>
                     Informe o setor e o serviço desejado.
                 </p>
@@ -270,7 +336,9 @@ export default function ChamadoPage() {
                     </div>
 
                     <button type="submit">
-                        Abrir Chamado
+                        {modoEdicao
+                            ? "Salvar Alterações"
+                            : "Abrir Chamado"}
                     </button>
 
                 </form>

@@ -243,6 +243,14 @@ namespace ControleChamados.Controllers
                 return Forbid();
             }
 
+            if (chamado.ResponsavelId != null)
+            {
+                return BadRequest(new
+                {
+                    message = "Não é possível editar um chamado que já foi assumido."
+                });
+            }
+
             if (chamado.Status == "Concluído")
             {
                 return BadRequest(new
@@ -308,6 +316,14 @@ namespace ControleChamados.Controllers
             if (chamado.UsuarioId != usuario.Id)
             {
                 return Forbid();
+            }
+
+            if (chamado.ResponsavelId != null)
+            {
+                return BadRequest(new
+                {
+                    message = "Não é possível excluir um chamado que já foi assumido."
+                });
             }
 
             _context.Chamados.Remove(chamado);

@@ -1,10 +1,12 @@
 import React, {useEffect, useState, ChangeEvent} from "react";
 import { useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import api from "../../../api/api";
 import ChamadoDto from "../../../DTOs/Chamado/ChamadoDto";
 import MensagemChamadoDto from "../../../DTOs/Chamado/MensagemChamadoDto";
 import CriarMensagemChamadoDto from "../../../DTOs/Chamado/CriarMensagemChamadoDto";
+import { useNavigate } from "react-router-dom";
 
 import "./ChamadoDetalhePage.css";
 
@@ -17,7 +19,7 @@ export default function ChamadoDetalhePage() {
     const [novaMensagem, setNovaMensagem] = useState<string>("");
     const [alterandoStatus, setAlterandoStatus] = useState<boolean>(false);
     const usuarioId = Number(localStorage.getItem("usuarioId"));
-
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!id) {
@@ -214,6 +216,43 @@ export default function ChamadoDetalhePage() {
             .toLocaleString("pt-BR");
     }
 
+    async function excluirChamado(): Promise<void> {
+
+        const resultado = await Swal.fire({
+            title: "Excluir chamado?",
+            text: "Esta ação não poderá ser desfeita.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, excluir",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        });
+        
+        if (!resultado.isConfirmed) {
+            return;
+        }
+
+        try {
+
+            await api.delete(
+                `/api/Chamados/${id}`
+            );
+
+            toast.success(
+                "Chamado excluído com sucesso."
+            );
+
+            window.location.href = "/chamados";
+
+        } catch (error: any) {
+
+            toast.error(
+                error?.response?.data?.message ||
+                "Erro ao excluir chamado."
+            );
+        }
+    }
+
     if (loading) {
         return <p>Carregando...</p>;
     }
@@ -234,6 +273,12 @@ export default function ChamadoDetalhePage() {
 
     const mostrarBotaoAssumir =
         chamado.Status === "Aberto" && !chamado.Responsavel && chamado.Servico && chamado.Servico.SetorId === Number(localStorage.getItem("usuarioSetorId"));
+
+    const podeEditarOuExcluir =
+        usuarioEhSolicitante &&
+        !chamado.Responsavel &&
+        chamado.Status !== "Concluído" &&
+        chamado.Status !== "Cancelado";
 
     return (
         <main className="chamado-detalhe-page">
@@ -376,6 +421,26 @@ export default function ChamadoDetalhePage() {
                         </div>
 
                     )}
+                
+                {podeEditarOuExcluir && (
+                    <>
+                        <button
+                            onClick={() =>
+                                navigate(
+                                    `/chamados/${chamado.Id}/editar`
+                                )
+                            }
+                        >
+                            Editar
+                        </button>
+
+                        <button
+                            onClick={excluirChamado}
+                        >
+                            Excluir
+                        </button>
+                    </>
+                )}
 
             </section>
 
