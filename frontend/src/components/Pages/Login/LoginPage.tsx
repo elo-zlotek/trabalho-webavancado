@@ -30,6 +30,10 @@ export default function LoginPage() {
         event: React.FormEvent<HTMLFormElement>
     ): Promise<void> {
         event.preventDefault();
+        if (!formData.Login.trim() || !formData.Senha.trim()) {
+            toast.error("Usuário e senha são obrigatórios.");
+            return; 
+        }
 
         try {
             setLoading(true);
