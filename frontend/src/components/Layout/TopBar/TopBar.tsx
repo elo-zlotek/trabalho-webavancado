@@ -12,9 +12,16 @@ export default function TopBar() {
         localStorage.removeItem("token");
         localStorage.removeItem("usuario");
         localStorage.removeItem("nome");
-
+        localStorage.removeItem("usuarioId");
+        localStorage.removeItem("usuarioSetorId");
         navigate("/login");
     }
+
+    const usuarioSetorId = Number(
+        localStorage.getItem("usuarioSetorId")
+    );
+
+    const isAdm = usuarioSetorId === 1;
 
     return (
         <header className="topbar">
@@ -35,9 +42,11 @@ export default function TopBar() {
                     Setores
                 </Link>
 
-                <Link to="/usuarios">
-                    Usuários
-                </Link>
+                {isAdm && (
+                    <Link to="/usuarios">
+                        Usuários
+                    </Link>
+                )}
             </nav>
 
             <div className="topbar-user">

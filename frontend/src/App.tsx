@@ -11,6 +11,7 @@ import ProtectedRoute from './auth/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 import ListaChamadosPage from './components/Pages/Chamado/ListaChamadosPage';
 import ChamadoDetalhePage from './components/Pages/Chamado/ChamadoDetalhePage';
+import AdminRoute from './auth/AdminRoute';
 
 function App() {
   return (
@@ -32,7 +33,14 @@ function App() {
       }>
         <Route path="/setores" element={<SetorPage />} />
         <Route path="/servicos" element={<ServicoPage />} />
-        <Route path="/usuarios" element={<UsuarioPage />} />
+        <Route
+            path="/usuarios"
+            element={
+                <AdminRoute>
+                    <UsuarioPage />
+                </AdminRoute>
+            }
+        />
         <Route path="/mensagens" element={<MensagemChamadoPage />} />
         <Route path="/novoChamado" element={<ChamadoPage />} />
         <Route path="/chamados/:id/editar" element={<ChamadoPage />}/>
