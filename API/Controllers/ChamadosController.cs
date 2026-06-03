@@ -155,7 +155,7 @@ namespace ControleChamados.Controllers
                     : new ServicoResumoDto
                     {
                         Id = chamado.Servico.Id,
-                        Nome = chamado.Servico.Nome
+                        Nome = chamado.Servico.Nome,
                         SetorId = chamado.Servico.SetorId
                     },
 
