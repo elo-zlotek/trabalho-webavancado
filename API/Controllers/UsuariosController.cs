@@ -158,7 +158,7 @@ namespace ControleChamados.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateAsync(int id, UsuarioCreateDto dto)
+        public async Task<IActionResult> UpdateAsync(int id, UsuarioUpdateDto dto)
         {
             var usuarioLogado = await _usuarioLogadoService.ObterUsuarioAsync(User.Identity?.Name);
 

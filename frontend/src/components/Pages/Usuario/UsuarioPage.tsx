@@ -6,6 +6,7 @@ import SetorDto from "../../../DTOs/Setor/SetorDto";
 import "./UsuarioPage.css";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import UsuarioUpdateDto from "../../../DTOs/Usuario/UsuarioUpdateDto";
 
 export default function UsuarioPage() {
     const [usuarios, setUsuarios] = useState<UsuarioDto[]>([]);
@@ -74,45 +75,55 @@ export default function UsuarioPage() {
 
         try {
 
-            const payload: UsuarioCreateDto = {
-                Nome: formData.Nome.trim(),
-                Login: formData.Login.trim(),
-                Senha: formData.Senha,
-                ConfirmarSenha: formData.ConfirmarSenha,
-                SetorId: formData.SetorId,
-            };
-
-            if (!payload.Nome || !payload.Login) {
-                toast.error("Nome e Usuário (Login) são obrigatórios.");
+            if (!formData.Nome.trim()) {
+                toast.error("Nome é obrigatório.");
                 return;
             }
 
-            if (payload.SetorId <= 0) {
-                toast.error("Selecione um setor válido para o usuário.");
+            if (formData.SetorId <= 0) {
+                toast.error("Selecione um setor válido.");
                 return;
-            }
-
-            if (!modoEdicao) {
-                if (!payload.Senha) {
-                    toast.error("A senha é obrigatória para novos cadastros.");
-                    return;
-                }
-                if (payload.Senha !== payload.ConfirmarSenha) {
-                    toast.error("A senha e a confirmação de senha não coincidem.");
-                    return;
-                }
             }
 
             if (modoEdicao && usuarioEditandoId !== null) {
+
+                const payload: UsuarioUpdateDto = {
+                    Nome: formData.Nome.trim(),
+                    SetorId: formData.SetorId
+                };
+
                 await api.put(`/api/Usuarios/${usuarioEditandoId}`, payload);
+
                 toast.success("Usuário atualizado com sucesso.");
+
             } else {
+
+                const payload: UsuarioCreateDto = {
+                    Nome: formData.Nome.trim(),
+                    Login: formData.Login.trim(),
+                    Senha: formData.Senha,
+                    ConfirmarSenha: formData.ConfirmarSenha,
+                    SetorId: formData.SetorId,
+                };
+
+                if (!payload.Login) {
+                    toast.error("Login é obrigatório.");
+                    return;
+                }
+
+                if (!payload.Senha || payload.Senha !== payload.ConfirmarSenha) {
+                    toast.error("Senha inválida ou não confere.");
+                    return;
+                }
+
                 await api.post("/api/Usuarios", payload);
+
                 toast.success("Usuário cadastrado com sucesso.");
             }
 
             limparFormulario();
             await carregarUsuarios();
+
         } catch (error: any) {
             console.error(error);
             const mensagem = error?.response?.data?.message || "Erro ao salvar o usuário.";
@@ -256,7 +267,7 @@ export default function UsuarioPage() {
                                         type="password"
                                         value={formData.Senha}
                                         onChange={handleInputChange}
-                                        required={!modoEdicao}
+                                        required
                                         placeholder="Digite a senha de acesso"
                                     />
                                 </div>
@@ -269,7 +280,7 @@ export default function UsuarioPage() {
                                         type="password"
                                         value={formData.ConfirmarSenha}
                                         onChange={handleInputChange}
-                                        required={!modoEdicao}
+                                        required
                                         placeholder="Digite a senha novamente"
                                     />
                                 </div>
@@ -318,20 +329,8 @@ export default function UsuarioPage() {
                                         <td>{user.Login}</td>
                                         <td>{user.Setor ? user.Setor.Nome : "Sem setor"}</td>
                                         <td>
-                                            <button
-                                                type="button"
-                                                onClick={() => editarUsuario(user)}
-                                                aria-label={`Editar usuário ${user.Nome}`}
-                                            >
-                                                Editar
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => excluirUsuario(user.Id)}
-                                                aria-label={`Excluir usuário ${user.Nome}`}
-                                            >
-                                                Excluir
-                                            </button>
+                                            <button onClick={() => editarUsuario(user)}>Editar</button>
+                                            <button onClick={() => excluirUsuario(user.Id)}>Excluir</button>
                                         </td>
                                     </tr>
                                 ))}
